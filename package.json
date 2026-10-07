@@ -1,0 +1,23 @@
+{
+  "name": "cupom-antifraude-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "node --test worker.test.mjs",
+    "build": "node worker-build.mjs",
+    "deploy": "wrangler deploy",
+    "check:deploy": "wrangler deploy --dry-run --outdir dist/wrangler"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "fast-xml-parser": "5.11.2"
+  },
+  "devDependencies": {
+    "esbuild-wasm": "0.28.2",
+    "wrangler": "4.148.0"
+  }
+}

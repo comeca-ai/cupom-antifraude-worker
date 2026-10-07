@@ -1,0 +1,459 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Cupom Antifraude API",
+    "version": "0.1.0",
+    "description": "Triagem NF-e/NFC-e. Sem certificado a existência fiscal permanece inconclusiva. Não há classificação definitiva de fraude nem aprovação automática."
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "security": [],
+        "summary": "Descoberta da API",
+        "responses": {
+          "200": {
+            "description": "Informações e link da documentação"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "security": [],
+        "summary": "Saúde do processo, sem testar a SEFAZ",
+        "responses": {
+          "200": {
+            "description": "Worker acessível"
+          }
+        }
+      }
+    },
+    "/api/check": {
+      "post": {
+        "operationId": "checkReceipt",
+        "summary": "Conferir cupom e opcionalmente registrar primeiro uso",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Triagem concluída. Leia official.status, signals e duplicate; HTTP 200 não significa nota verdadeira.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de entrada, autenticação ou infraestrutura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Erro de entrada, autenticação ou infraestrutura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Erro de entrada, autenticação ou infraestrutura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Erro de entrada, autenticação ou infraestrutura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Erro de entrada, autenticação ou infraestrutura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Erro de entrada, autenticação ou infraestrutura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro de entrada, autenticação ou infraestrutura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Erro de entrada, autenticação ou infraestrutura",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "API_TOKEN configurado no Worker; mínimo 32 caracteres."
+      }
+    },
+    "schemas": {
+      "CheckRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 44,
+            "maxLength": 100,
+            "pattern": "^[0-9\\s]+$",
+            "description": "Chave numérica de 44 dígitos, com espaços opcionais. Nunca envie como número."
+          },
+          "expenseId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,100}$",
+            "description": "Se informado, registra primeiro uso no D1. Retry do mesmo par é idempotente."
+          },
+          "expected": {
+            "type": "object",
+            "properties": {
+              "issuer": {
+                "type": "string",
+                "pattern": "^[0-9]{14}$"
+              },
+              "date": {
+                "type": "string",
+                "format": "date",
+                "pattern": "^20[0-9]{2}-[0-9]{2}-[0-9]{2}$"
+              },
+              "amountCents": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000000000,
+                "description": "Valor declarado; não pode ser confirmado apenas pela chave."
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "additionalProperties": false
+      },
+      "CheckResult": {
+        "type": "object",
+        "properties": {
+          "checkedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[0-9]{44}$"
+          },
+          "document": {
+            "type": "object",
+            "properties": {
+              "uf": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "model": {
+                "type": "string"
+              },
+              "issuer": {
+                "type": "string"
+              },
+              "yearMonth": {
+                "type": "string"
+              },
+              "series": {
+                "type": "string"
+              },
+              "number": {
+                "type": "string"
+              },
+              "emissionType": {
+                "type": "string"
+              }
+            },
+            "required": []
+          },
+          "assessment": {
+            "type": "string",
+            "enum": [
+              "review_required",
+              "inconclusive"
+            ]
+          },
+          "summary": {
+            "type": "string"
+          },
+          "official": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "authorized",
+                  "cancelled",
+                  "denied",
+                  "not_found",
+                  "inconclusive"
+                ]
+              },
+              "checkedAt": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reason": {
+                "type": "string"
+              },
+              "cStat": {
+                "type": "string"
+              },
+              "protocol": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "checkedAt",
+              "source",
+              "reason"
+            ]
+          },
+          "signals": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ]
+            }
+          },
+          "duplicate": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "not_requested",
+                  "unavailable",
+                  "registered",
+                  "same_expense",
+                  "conflict"
+                ]
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "manualConsultationUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "checks": {
+            "type": "object",
+            "properties": {
+              "keyStructure": {
+                "type": "string",
+                "enum": [
+                  "consistent",
+                  "invalid"
+                ]
+              },
+              "modelSupported": {
+                "type": "boolean"
+              },
+              "issuer": {
+                "type": "string",
+                "enum": [
+                  "compared_with_key",
+                  "not_requested"
+                ]
+              },
+              "date": {
+                "type": "string",
+                "enum": [
+                  "month_only",
+                  "not_requested"
+                ]
+              },
+              "amount": {
+                "type": "string",
+                "enum": [
+                  "not_verified",
+                  "not_requested"
+                ]
+              }
+            },
+            "required": []
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "checkedAt",
+          "key",
+          "document",
+          "assessment",
+          "summary",
+          "official",
+          "signals",
+          "duplicate",
+          "manualConsultationUrl",
+          "checks",
+          "limitations"
+        ]
+      }
+    }
+  }
+}

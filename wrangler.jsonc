@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cupom-antifraude",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-01",
+  "observability": {"enabled": false}
+  // API_TOKEN obrigatório: npx wrangler secret put API_TOKEN
+  // Para histórico, adicione d1_databases conforme README-WORKER.md.
+  // Para consulta oficial, adicione mtls_certificates com binding SEFAZ_MTLS.
+}

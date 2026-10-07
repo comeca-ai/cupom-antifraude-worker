@@ -18,3 +18,13 @@ build
 composer.lock
 config.json
 .phpunit.result.cache
+
+# Cloudflare Worker
+node_modules/
+.wrangler/
+dist/
+.dev.vars*
+.env*
+*.pfx
+*.p12
+*.key

@@ -1,3 +1,13 @@
+# Cupom Antifraude — Cloudflare Workers API
+
+API para triagem de cupons por chave de acesso de 44 dígitos. **[Documentação, integração e deploy](README-WORKER.md)** · **[OpenAPI](worker-openapi.json)**
+
+Sem certificado configurado, a existência fiscal permanece inconclusiva. A API valida a estrutura da chave, compara dados declarados e detecta reapresentação de cupons quando D1 está habilitado. A consulta oficial via mTLS está implementada e depende de configuração e validação em produção.
+
+Este fork preserva abaixo a documentação da biblioteca PHP original, que não é executada pelo Worker.
+
+---
+
 # SPED-NFE 
 
 Biblioteca para geração e comunicação das NFe com as SEFAZ autorizadoras, e visa fornecer os meios para gerar, assinar e enviar os dados relativos ao projeto Sped NFe das SEFAZ.
